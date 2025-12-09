@@ -20,7 +20,11 @@ app_license = "mit"
 # 		"has_permission": "advanced_finance.api.permission.has_app_permission"
 # 	}
 # ]
-
+doc_events = {
+    "Payment Entry": {
+        "before_insert": "advanced_finance.api.fill_opening"
+    }
+}
 # Includes in <head>
 # ------------------
 

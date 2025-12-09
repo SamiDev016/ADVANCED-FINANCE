@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:CL-{YY,MM,DD}{###}",
  "creation": "2025-12-09 11:48:02.248519",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -9,7 +10,7 @@
   "amended_from",
   "date",
   "opening",
-  "table_aemk",
+  "cash_register_transactions",
   "section_break_nvxu",
   "expected_amount",
   "collected_amount",
@@ -44,11 +45,6 @@
    "options": "Cash Register Opening"
   },
   {
-   "fieldname": "table_aemk",
-   "fieldtype": "Table",
-   "options": "Cash Register Transactions"
-  },
-  {
    "fieldname": "expected_amount",
    "fieldtype": "Currency",
    "label": "Expected Amount"
@@ -76,16 +72,23 @@
   {
    "fieldname": "column_break_lgvj",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cash_register_transactions",
+   "fieldtype": "Table",
+   "label": "Cash Register Transactions",
+   "options": "Cash Register Transactions"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 11:53:43.166861",
+ "modified": "2025-12-09 15:11:09.230281",
  "modified_by": "Administrator",
  "module": "Advanced Finance",
  "name": "Cash Register Closing",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

@@ -133,6 +133,7 @@ def create_cash_register_session(date, opened_by, amount, mode_of_payment):
     doc.submit()
 
     return {"name": doc.name}
+
 @frappe.whitelist()
 def get_opening_transactions(opening):
     if not opening:
@@ -312,19 +313,15 @@ def close_cash_register_session(date, opening, amount):
     closing_doc.insert(ignore_permissions=True)
     closing_doc.submit()
 
-    # CLOSE SALES
     for t in sales_payments:
         frappe.db.set_value("Payment Entry", t.name, "custom_is_closed", 1)
 
-    # CLOSE INTERNAL TRANSFER — sender side
     for t in sender_transfers:
         frappe.db.set_value("Payment Entry", t.name, "custom_sender_closed", 1)
 
-    # CLOSE INTERNAL TRANSFER — receiver side
     for t in receiver_transfers:
         frappe.db.set_value("Payment Entry", t.name, "custom_receiver_closed", 1)
 
-    # FULLY CLOSE INTERNAL TRANSFER ONLY WHEN BOTH SIDES CLOSED
     internal_entries = frappe.get_all(
         "Payment Entry",
         filters={"payment_type": "Internal Transfer"},
@@ -334,31 +331,29 @@ def close_cash_register_session(date, opening, amount):
         if e.custom_sender_closed == 1 and e.custom_receiver_closed == 1:
             frappe.db.set_value("Payment Entry", e.name, "custom_is_closed", 1)
 
-    # HANDLE SHORTAGE (unchanged)
-    if shortage != 0:
-        mode_of_payment = current_register
-        accounts = frappe.get_all(
-            "Mode of Payment Account",
-            filters={"parent": mode_of_payment, "company": default_company_name},
-            fields=["default_account"]
-        )
+    mode_of_payment = current_register
+    accounts = frappe.get_all(
+        "Mode of Payment Account",
+        filters={"parent": mode_of_payment, "company": default_company_name},
+        fields=["default_account"]
+    )
 
-        cash_account = accounts[0].default_account
+    cash_account = accounts[0].default_account
 
-        pe = frappe.get_doc({
-            "doctype": "Payment Entry",
-            "payment_type": "Internal Transfer",
-            "paid_from": cash_account,
-            "paid_to": destination_account,
-            "paid_amount": expected_amount,
-            "received_amount": amount,
-            "posting_date": now(),
-            "custom_cash_register_opening": opening,
-            "custom_is_closed": 1,
-            "company": default_company_name
-        })
-        pe.insert(ignore_permissions=True)
-        pe.submit()
+    pe = frappe.get_doc({
+        "doctype": "Payment Entry",
+        "payment_type": "Internal Transfer",
+        "paid_from": cash_account,
+        "paid_to": destination_account,
+        "paid_amount": expected_amount,
+        "received_amount": amount,
+        "posting_date": now(),
+        "custom_cash_register_opening": opening,
+        "custom_is_closed": 1,
+        "company": default_company_name
+    })
+    pe.insert(ignore_permissions=True)
+    pe.submit()
 
     opening_doc.db_set("is_closed", 1)
     opening_doc.db_set("closing", closing_doc.name)
